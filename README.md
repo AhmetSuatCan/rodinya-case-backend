@@ -23,7 +23,47 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Ordering Service Backend - A NestJS application with JWT authentication, user management, and comprehensive API documentation.
+
+## Features
+
+- **JWT Authentication**: Secure authentication with access and refresh tokens stored in HTTP-only cookies
+- **User Management**: User registration, login, and profile management
+- **API Documentation**: Comprehensive Swagger/OpenAPI documentation
+- **MongoDB Integration**: Database integration with Mongoose ODM
+- **Security**: Password hashing with bcrypt, secure cookie configuration
+
+## API Documentation
+
+Once the application is running, you can access the interactive API documentation at:
+
+```
+http://localhost:8000/api/docs
+```
+
+The documentation includes:
+- **Authentication endpoints**: register, login, logout, refresh, profile
+- **User management endpoints**: create, read, update, delete users
+- Request/response schemas with validation rules
+- Authentication requirements for protected endpoints
+- Example requests and responses
+- Error handling documentation
+
+### API Endpoints Overview
+
+#### Authentication (`/auth`)
+- `POST /auth/register` - Register a new user
+- `POST /auth/login` - User login (sets HTTP-only cookies)
+- `POST /auth/logout` - User logout (clears cookies)
+- `POST /auth/refresh` - Refresh access token
+- `GET /auth/profile` - Get authenticated user profile (protected)
+
+#### Users (`/users`)
+- `POST /users` - Create a new user
+- `GET /users` - Get all users
+- `GET /users/:id` - Get user by ID
+- `PATCH /users/:id` - Update user by ID
+- `DELETE /users/:id` - Delete user by ID
 
 ## Project setup
 
