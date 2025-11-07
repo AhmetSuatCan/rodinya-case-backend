@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { winstonConfig } from './config/winston.config';
+import { StockModule } from './stock/stock.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { winstonConfig } from './config/winston.config';
     }),
     UsersModule,
     AuthModule,
+    StockModule,
   ],
   controllers: [AppController],
   providers: [AppService],
