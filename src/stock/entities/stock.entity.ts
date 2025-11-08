@@ -4,7 +4,10 @@ import { Product } from './product.entity';
 
 export type StockDocument = Stock & Document;
 
-@Schema({ timestamps: true })
+@Schema({ 
+  timestamps: true,
+  versionKey: '__v' // Explicitly enable versioning for optimistic locking
+})
 export class Stock {
   _id?: Types.ObjectId;
 
@@ -13,6 +16,9 @@ export class Stock {
 
   @Prop({ required: true, default: 0, min: 0 })
   quantity: number;
+
+  // Explicit version field for optimistic locking
+  __v?: number;
 
   createdAt?: Date;
   updatedAt?: Date;

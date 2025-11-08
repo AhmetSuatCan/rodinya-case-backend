@@ -42,17 +42,18 @@ export class StockService {
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
-    const product = await this.productModel
-      .findByIdAndUpdate(id, updateProductDto, {
-        new: true,
-        runValidators: true,
-      })
-      .exec();
-
+    // Use find-then-save pattern for proper __v versioning and middleware execution
+    const product = await this.productModel.findById(id).exec();
+    
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    return product;
+
+    // Apply updates to the document
+    Object.assign(product, updateProductDto);
+    
+    // Save triggers middleware and increments __v automatically
+    return await product.save();
   }
 
   async removeProduct(id: string): Promise<void> {
@@ -125,15 +126,21 @@ export class StockService {
     id: string,
     updateStockDto: UpdateStockDto,
   ): Promise<Stock> {
-    const stock = await this.stockModel
-      .findByIdAndUpdate(id, updateStockDto, { new: true, runValidators: true })
-      .populate('productId')
-      .exec();
-
+    // Use find-then-save pattern for proper __v versioning and middleware execution
+    const stock = await this.stockModel.findById(id).populate('productId').exec();
+    
     if (!stock) {
       throw new NotFoundException(`Stock with ID ${id} not found`);
     }
-    return stock;
+
+    // Apply updates to the document
+    Object.assign(stock, updateStockDto);
+    
+    // Save triggers middleware and increments __v automatically
+    const savedStock = await stock.save();
+    
+    // Re-populate after save since save() returns the raw document
+    return await this.stockModel.findById(savedStock._id).populate('productId').exec() as Stock;
   }
 
   async removeStock(id: string): Promise<void> {
@@ -254,7 +261,8 @@ export class StockService {
             },
             {
               $inc: {
-                quantity: -quantity, // Decrement quantity (__v auto-incremented by Mongoose)
+                quantity: -quantity, // Decrement quantity
+                __v: 1, // Manually increment version field (findOneAndUpdate doesn't auto-increment)
               },
             },
             {
@@ -284,36 +292,60 @@ export class StockService {
   }
 
   /**
-   * Atomically increments stock quantity (for rollbacks) - __v auto-incremented by Mongoose
+   * Atomically increments stock quantity (for rollbacks) using optimistic locking with MongoDB's __v field
+   * Uses same retry mechanism as decrementStockAtomic for consistency
    */
   async incrementStockAtomic(
     stockId: string,
     quantity: number,
   ): Promise<{ success: boolean; currentStock?: Stock; error?: string }> {
-    try {
-      const updatedStock = await this.stockModel
-        .findByIdAndUpdate(
-          stockId,
-          {
-            $inc: {
-              quantity: quantity, // Increment quantity (__v auto-incremented by Mongoose)
+    const maxRetries = 3;
+    let retryCount = 0;
+
+    while (retryCount < maxRetries) {
+      try {
+        // Get current stock with MongoDB's built-in version (__v)
+        const currentStock = await this.stockModel.findById(stockId).exec();
+        if (!currentStock) {
+          return { success: false, error: 'Stock not found' };
+        }
+
+        // Attempt atomic update with __v version check (optimistic locking)
+        const updatedStock = await this.stockModel
+          .findOneAndUpdate(
+            {
+              _id: stockId,
+              __v: currentStock.__v, // Use MongoDB's built-in version field
             },
-          },
-          {
-            new: true,
-            runValidators: true,
-          },
-        )
-        .populate('productId')
-        .exec();
+            {
+              $inc: {
+                quantity: quantity, // Increment quantity
+                __v: 1, // Manually increment version field (findOneAndUpdate doesn't auto-increment)
+              },
+            },
+            {
+              new: true,
+              runValidators: true,
+            },
+          )
+          .populate('productId')
+          .exec();
 
-      if (!updatedStock) {
-        return { success: false, error: 'Stock not found' };
+        if (!updatedStock) {
+          // Version conflict - another process updated the stock
+          retryCount++;
+          continue;
+        }
+
+        return { success: true, currentStock: updatedStock };
+      } catch (error) {
+        return { success: false, error: `Database error: ${error.message}` };
       }
-
-      return { success: true, currentStock: updatedStock };
-    } catch (error) {
-      return { success: false, error: `Database error: ${error.message}` };
     }
+
+    return {
+      success: false,
+      error: 'Max retries exceeded due to version conflicts',
+    };
   }
 }
