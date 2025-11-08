@@ -85,7 +85,13 @@ export class AuthController {
         `Registration failed for email: ${registerDto.email} - ${error.message}`,
         'AuthController',
       );
-      throw error;
+      
+      // Create a clean error without circular references
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error('Registration failed');
+      }
     }
   }
 
@@ -150,7 +156,13 @@ export class AuthController {
         `Login failed for email: ${loginDto.email} - ${error.message}`,
         'AuthController',
       );
-      throw error;
+      
+      // Create a clean error without circular references
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error('Login failed');
+      }
     }
   }
 

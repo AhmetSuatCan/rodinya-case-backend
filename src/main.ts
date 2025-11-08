@@ -3,12 +3,16 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Set Winston as the default logger
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+
+  // Global exception filter to handle circular reference errors
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // CORS configuration
   const isDevelopment = process.env.NODE_ENV === 'development';

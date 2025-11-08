@@ -132,8 +132,12 @@ export class OrderController {
         error.stack,
       );
 
-      // Re-throw the error to let NestJS handle the HTTP response
-      throw error;
+      // Create a clean error without circular references
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error('Order creation failed');
+      }
     }
   }
 
@@ -194,7 +198,12 @@ export class OrderController {
         error.stack,
       );
 
-      throw error;
+      // Create a clean error without circular references
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error('Failed to retrieve orders');
+      }
     }
   }
 }
