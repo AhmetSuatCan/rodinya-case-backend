@@ -101,4 +101,34 @@ export class OrderService {
       throw error;
     }
   }
+
+  async findOrdersByUserId(userId: string): Promise<OrderDocument[]> {
+    this.logger.log(`Finding orders for user: ${userId}`);
+    
+    const orders = await this.orderModel
+      .find({ userId })
+      .populate('productId', 'name description')
+      .populate('stockId', 'quantity')
+      .sort({ createdAt: -1 }) // Most recent orders first
+      .exec();
+
+    this.logger.log(`Found ${orders.length} orders for user: ${userId}`);
+    return orders;
+  }
+
+  async findOrderById(orderId: string): Promise<OrderDocument> {
+    this.logger.log(`Finding order by ID: ${orderId}`);
+    
+    const order = await this.orderModel
+      .findById(orderId)
+      .populate('productId', 'name description')
+      .populate('stockId', 'quantity')
+      .exec();
+
+    if (!order) {
+      throw new Error(`Order with ID ${orderId} not found`);
+    }
+
+    return order;
+  }
 }

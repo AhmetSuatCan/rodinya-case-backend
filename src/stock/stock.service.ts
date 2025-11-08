@@ -9,6 +9,7 @@ import { CreateStockDto } from './dto/create-stock.dto';
 import { UpdateStockDto } from './dto/update-stock.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductWithStockDto } from './dto/product-with-stock.dto';
 import { Product, ProductDocument } from './entities/product.entity';
 import { Stock, StockDocument } from './entities/stock.entity';
 
@@ -17,7 +18,7 @@ export class StockService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
-  ) {}
+  ) { }
 
   // Product CRUD operations
   async createProduct(createProductDto: CreateProductDto): Promise<Product> {
@@ -161,6 +162,59 @@ export class StockService {
 
   remove(id: string) {
     return this.removeStock(id);
+  }
+
+  /**
+   * Get all products with their available stock information
+   * Returns products that have stock entries only
+   */
+  async findProductsWithStock(): Promise<ProductWithStockDto[]> {
+    const stocksWithProducts = await this.stockModel
+      .find()
+      .populate('productId')
+      .exec();
+
+    return stocksWithProducts.map((stock) => {
+      const product = stock.productId as Product;
+      return {
+        productId: product._id!,
+        stockId: stock._id!,
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        images: product.images,
+        availableStock: stock.quantity,
+        createdAt: product.createdAt!,
+        updatedAt: product.updatedAt!,
+      };
+    });
+  }
+
+  /**
+   * Get a specific product with its stock information
+   */
+  async findProductWithStock(productId: string): Promise<ProductWithStockDto> {
+    const stock = await this.stockModel
+      .findOne({ productId: productId })
+      .populate('productId')
+      .exec();
+
+    if (!stock) {
+      throw new NotFoundException(`Stock for product ${productId} not found`);
+    }
+
+    const product = stock.productId as Product;
+    return {
+      productId: product._id!,
+      stockId: stock._id!,
+      name: product.name,
+      price: product.price,
+      description: product.description,
+      images: product.images,
+      availableStock: stock.quantity,
+      createdAt: product.createdAt!,
+      updatedAt: product.updatedAt!,
+    };
   }
 
   /**

@@ -21,6 +21,7 @@ import { CreateStockDto } from './dto/create-stock.dto';
 import { UpdateStockDto } from './dto/update-stock.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductWithStockDto } from './dto/product-with-stock.dto';
 
 @ApiTags('Stock Management')
 @Controller('stock')
@@ -91,6 +92,41 @@ export class StockController {
   })
   removeProduct(@Param('id') id: string) {
     return this.stockService.removeProduct(id);
+  }
+
+  // Product showcase endpoints
+  @Get('products-with-stock')
+  @ApiOperation({ 
+    summary: 'Get all products with their available stock information',
+    description: 'Returns a list of all products that have stock entries, including product details and available stock quantity'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of products with stock information',
+    type: [ProductWithStockDto]
+  })
+  findProductsWithStock() {
+    return this.stockService.findProductsWithStock();
+  }
+
+  @Get('products-with-stock/:productId')
+  @ApiOperation({ 
+    summary: 'Get a specific product with its stock information',
+    description: 'Returns product details along with available stock quantity for a specific product'
+  })
+  @ApiParam({
+    name: 'productId',
+    description: 'Product ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Product with stock information',
+    type: ProductWithStockDto
+  })
+  @ApiResponse({ status: 404, description: 'Product or stock not found' })
+  findProductWithStock(@Param('productId') productId: string) {
+    return this.stockService.findProductWithStock(productId);
   }
 
   // Stock endpoints

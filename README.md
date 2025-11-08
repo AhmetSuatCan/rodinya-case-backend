@@ -1,138 +1,337 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Ordering Service Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A robust, production-ready e-commerce ordering system built with NestJS, featuring advanced order processing, real-time stock management, and enterprise-grade security. This microservice handles the complete order lifecycle from product showcase to order fulfillment with VIP user prioritization and atomic transaction processing.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Overview
 
-## Description
+This ordering service backend is designed for high-performance e-commerce applications requiring:
+- **Atomic order processing** with race condition prevention
+- **VIP customer prioritization** in order queues
+- **Real-time stock management** with optimistic locking
+- **Secure JWT authentication** with HTTP-only cookies
+- **Asynchronous order processing** with Redis-based queues
+- **Comprehensive API documentation** with Swagger/OpenAPI
 
-Ordering Service Backend - A NestJS application with JWT authentication, user management, and comprehensive API documentation.
+## 🏗️ Architecture
 
-## Features
+### Core Technologies
+- **Framework**: NestJS (Node.js/TypeScript)
+- **Database**: MongoDB with Mongoose ODM
+- **Queue System**: Redis with BullMQ
+- **Authentication**: JWT with Passport.js
+- **API Documentation**: Swagger/OpenAPI
+- **Logging**: Winston
+- **Containerization**: Docker with Docker Compose
+- **Reverse Proxy**: Nginx
 
-- **JWT Authentication**: Secure authentication with access and refresh tokens stored in HTTP-only cookies
-- **User Management**: User registration, login, and profile management
-- **API Documentation**: Comprehensive Swagger/OpenAPI documentation
-- **MongoDB Integration**: Database integration with Mongoose ODM
-- **Security**: Password hashing with bcrypt, secure cookie configuration
-
-## API Documentation
-
-Once the application is running, you can access the interactive API documentation at:
-
+### Key Modules
 ```
-http://localhost:8000/api/docs
+src/
+├── auth/           # JWT authentication & authorization
+├── users/          # User management & profiles
+├── order/          # Order processing & lifecycle management
+├── stock/          # Product catalog & inventory management
+├── health/         # Health checks & monitoring
+└── config/         # Application configuration
 ```
 
-The documentation includes:
-- **Authentication endpoints**: register, login, logout, refresh, profile
-- **User management endpoints**: create, read, update, delete users
-- Request/response schemas with validation rules
-- Authentication requirements for protected endpoints
-- Example requests and responses
-- Error handling documentation
+## ✨ Features
 
-### API Endpoints Overview
+### 🔐 Authentication & Security
+- **JWT Authentication** with access/refresh token rotation
+- **HTTP-only cookies** for secure token storage
+- **Password hashing** with bcrypt
+- **Role-based access control** with VIP user support
+- **CORS configuration** for cross-origin requests
 
-#### Authentication (`/auth`)
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - User login (sets HTTP-only cookies)
-- `POST /auth/logout` - User logout (clears cookies)
-- `POST /auth/refresh` - Refresh access token
-- `GET /auth/profile` - Get authenticated user profile (protected)
+### 📦 Order Management
+- **Atomic order processing** preventing overselling
+- **VIP user priority** in order queues
+- **Order status tracking** (PENDING → CONFIRMED → FAILED)
+- **Dead letter queue** handling for failed orders
+- **Optimistic locking** for concurrent stock updates
 
-#### Users (`/users`)
-- `POST /users` - Create a new user
-- `GET /users` - Get all users
-- `GET /users/:id` - Get user by ID
-- `PATCH /users/:id` - Update user by ID
-- `DELETE /users/:id` - Delete user by ID
+### 🛍️ Product & Stock Management
+- **Product showcase** with real-time stock availability
+- **Atomic stock operations** with version control
+- **Stock reservation** during order processing
+- **Automatic rollback** on order failures
 
-## Project setup
+### 🔄 Asynchronous Processing
+- **Redis-based queues** for order processing
+- **Bull Dashboard** for queue monitoring
+- **Retry mechanisms** for transient failures
+- **Dead letter queue** for failed job handling
+
+### 📊 Monitoring & Observability
+- **Health checks** for all services
+- **Winston logging** with structured logs
+- **Queue monitoring** via Bull Dashboard
+- **Docker health checks** for container orchestration
+
+## 🗂️ Project Structure
+
+```
+ordering-service-backend/
+├── src/
+│   ├── auth/                    # Authentication module
+│   │   ├── decorators/          # Custom decorators (@CurrentUser)
+│   │   ├── dto/                 # Data transfer objects
+│   │   ├── auth.controller.ts   # Auth endpoints
+│   │   ├── auth.service.ts      # Auth business logic
+│   │   └── jwt.strategy.ts      # JWT strategy
+│   ├── order/
+│   │   ├── dto/                 # Order DTOs
+│   │   ├── entities/            # Order entity & schema
+│   │   ├── order.controller.ts  # Order endpoints
+│   │   ├── order.service.ts     # Order business logic
+│   │   ├── order.processor.ts   # Async order processing
+│   │   └── order-dlq.processor.ts # Dead letter queue handler
+│   ├── stock/
+│   │   ├── entities/            # Product & Stock entities
+│   │   ├── dto/                 # Stock DTOs
+│   │   ├── stock.controller.ts  # Stock endpoints
+│   │   └── stock.service.ts     # Stock management logic
+│   ├── users/                   # User management
+│   ├── health/                  # Health check endpoints
+│   ├── config/                  # Configuration files
+│   ├── app.module.ts           # Root application module
+│   └── main.ts                 # Application bootstrap
+├── docker/
+│   ├── docker-compose.yml      # Multi-service orchestration
+│   ├── Dockerfile              # Application container
+│   └── nginx.conf              # Reverse proxy configuration
+├── test/                       # E2E and integration tests
+├── docs/                       # Documentation
+└── logs/                       # Application logs
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- Node.js 18+ (for local development)
+- Git
+
+### 1. Clone & Setup
+```bash
+git clone <repository-url>
+cd ordering-service-backend
+cp .env.example .env
+```
+
+### 2. Configure Environment
+Edit `.env` with your configuration:
+```bash
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-min-32-characters
+JWT_REFRESH_SECRET=your-super-secret-refresh-key-min-32-characters
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/ordering-service
+
+# Server
+PORT=8000
+NODE_ENV=development
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+### 3. Start with Docker
+```bash
+cd docker
+docker-compose up -d
+```
+
+### 4. Access Services
+- **API**: http://localhost:80
+- **API Documentation**: http://localhost:80/api/docs
+- **Health Check**: http://localhost:80/health
+- **Queue Dashboard**: http://localhost:80/admin/queues
+- **Redis UI**: http://localhost:8081 (admin/admin123)
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+```bash
+POST /auth/register    # Register new user
+POST /auth/login       # User login (sets cookies)
+POST /auth/logout      # User logout (clears cookies)
+POST /auth/refresh     # Refresh access token
+GET  /auth/profile     # Get user profile (protected)
+```
+
+### Product & Stock Endpoints
+```bash
+GET /stock/products-with-stock           # Get all products with stock
+GET /stock/products-with-stock/:id       # Get specific product with stock
+```
+
+### Order Endpoints
+```bash
+POST /order            # Create new order (protected)
+GET  /order            # Get user orders (protected)
+```
+
+### Example: Create Order
+```bash
+curl -X POST http://localhost:8000/order \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <jwt-token>" \
+  -d '{
+    "stockId": "507f1f77bcf86cd799439011",
+    "quantity": 2,
+    "priceAtPurchase": 999.99
+  }'
+```
+
+## 🧪 Testing
 
 ```bash
-$ npm install
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+
+# Load testing
+node test/load-test.js
 ```
 
-## Compile and run the project
+## 🐳 Docker Development
 
 ```bash
-# development
-$ npm run start
+# Start all services
+docker-compose up -d
 
-# watch mode
-$ npm run start:dev
+# View logs
+docker-compose logs -f app
 
-# production mode
-$ npm run start:prod
+# Run tests in container
+docker-compose exec app npm run test
+
+# Access container shell
+docker-compose exec app sh
+
+# Stop services
+docker-compose down
 ```
 
-## Run tests
+## 🔧 Development Scripts
 
 ```bash
-# unit tests
-$ npm run test
+# Development
+npm run start:dev      # Watch mode
+npm run start:debug    # Debug mode
 
-# e2e tests
-$ npm run test:e2e
+# Code Quality
+npm run lint           # ESLint
+npm run format         # Prettier
+npm run build          # Production build
 
-# test coverage
-$ npm run test:cov
+# Testing
+npm run test:watch     # Watch mode testing
+npm run test:debug     # Debug tests
 ```
 
-## Deployment
+## 🏭 Production Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### Environment Variables
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+NODE_ENV=production
+JWT_SECRET=<secure-32-char-secret>
+JWT_REFRESH_SECRET=<secure-32-char-secret>
+MONGODB_URI=<production-mongodb-uri>
+REDIS_HOST=<redis-host>
+REDIS_PORT=6379
+PORT=8000
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Docker Production
+```bash
+# Build production image
+docker build -f docker/Dockerfile --target production -t ordering-service .
 
-## Resources
+# Run production container
+docker run -d \
+  --name ordering-service \
+  --env-file .env \
+  -p 8000:8000 \
+  ordering-service
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## 📊 Monitoring
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Health Checks
+- **Application**: `GET /health`
+- **Database**: Automatic MongoDB connection monitoring
+- **Redis**: Queue system health monitoring
 
-## Support
+### Logging
+- **Error logs**: `logs/error.log`
+- **Combined logs**: `logs/combined.log`
+- **Console output**: Development mode
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Queue Monitoring
+- **Bull Dashboard**: http://localhost:8000/admin/queues
+- **Redis Commander**: http://localhost:8081
 
-## Stay in touch
+## 🔒 Security Features
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- **JWT token rotation** with short-lived access tokens
+- **HTTP-only cookies** preventing XSS attacks
+- **Password hashing** with bcrypt
+- **Input validation** with class-validator
+- **CORS protection** with configurable origins
+- **Rate limiting** ready for implementation
 
-## License
+## 🚨 Troubleshooting
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Common Issues
+
+**Port conflicts:**
+```bash
+lsof -i :8000
+kill -9 <PID>
+```
+
+**Database connection:**
+```bash
+docker-compose logs mongodb
+docker-compose restart mongodb
+```
+
+**Redis connection:**
+```bash
+docker-compose exec redis redis-cli ping
+```
+
+**Container rebuild:**
+```bash
+docker-compose down
+docker-compose up --build
+```
+
+## 📖 Additional Documentation
+
+- **[Setup Guide](docs/SETUP_GUIDE.md)** - Detailed setup instructions
+- **[API Integration Guide](docs/API_INTEGRATION_GUIDE.md)** - Frontend integration examples
+- **[Swagger Documentation](http://localhost:8000/api/docs)** - Interactive API docs
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

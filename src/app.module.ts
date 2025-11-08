@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { winstonConfig } from './config/winston.config';
 import { StockModule } from './stock/stock.module';
 import { OrderModule } from './order/order.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -29,13 +30,15 @@ import { OrderModule } from './order/order.module';
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        connection: {
-          host: configService.get<string>('REDIS_HOST', 'localhost'),
-          port: configService.get<number>('REDIS_PORT', 6379),
-          password: configService.get<string>('REDIS_PASSWORD'),
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        return {
+          connection: {
+            host: configService.get<string>('REDIS_HOST', 'localhost'),
+            port: configService.get<number>('REDIS_PORT', 6379),
+            password: configService.get<string>('REDIS_PASSWORD'),
+          },
+        };
+      },
       inject: [ConfigService],
     }),
     BullBoardModule.forRoot({
@@ -46,6 +49,7 @@ import { OrderModule } from './order/order.module';
     AuthModule,
     StockModule,
     OrderModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

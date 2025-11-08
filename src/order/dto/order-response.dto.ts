@@ -15,16 +15,22 @@ export class OrderResponseDto {
   userId: string;
 
   @ApiProperty({
-    description: 'The ID of the product being ordered',
-    example: '507f1f77bcf86cd799439012',
+    description: 'Name of the product being ordered',
+    example: 'iPhone 15',
   })
-  productId: string;
+  productName: string;
 
   @ApiProperty({
-    description: 'The ID of the stock item being ordered',
-    example: '507f1f77bcf86cd799439013',
+    description: 'Description of the product being ordered',
+    example: 'Latest iPhone model with advanced features',
   })
-  stockId: string;
+  productDescription: string;
+
+  @ApiProperty({
+    description: 'Available stock quantity for this product',
+    example: 150,
+  })
+  availableStock: number;
 
   @ApiProperty({
     description: 'Quantity of the product ordered',

@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   HttpStatus,
   HttpCode,
@@ -26,7 +27,7 @@ import { User } from '../users/entities/user.entity';
 export class OrderController {
   private readonly logger = new Logger(OrderController.name);
 
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -60,7 +61,7 @@ export class OrderController {
     @CurrentUser() user: User,
   ): Promise<OrderResponseDto> {
     const startTime = Date.now();
-    
+
     // Extract user info from JWT token
     const userId = (user as any)._id.toString();
     const isVip = user.isVIP;
@@ -93,41 +94,106 @@ export class OrderController {
 
       // Create the order using the service (now returns the created order document)
       this.logger.log(`Creating order for user ${userId} with stock ${createOrderDto.stockId}`);
-      
+
       const createdOrder = await this.orderService.createOrder(
         orderPayload,
         isVip,
       );
 
       const processingTime = Date.now() - startTime;
-      
+
       this.logger.log(
         `Order created successfully - OrderId: ${createdOrder._id}, UserId: ${userId}, ProductId: ${createdOrder.productId}, Status: ${createdOrder.status}, ProcessingTime: ${processingTime}ms`,
       );
 
-      // Return the created order
+      // Populate the created order to get product and stock details
+      const populatedOrder = await this.orderService.findOrderById(createdOrder._id.toString());
+
+      // Return the created order with user-friendly format
       return {
-        _id: createdOrder._id.toString(),
-        userId: createdOrder.userId.toString(),
-        productId: createdOrder.productId.toString(),
-        stockId: createdOrder.stockId.toString(),
-        quantity: createdOrder.quantity,
-        priceAtPurchase: createdOrder.priceAtPurchase,
-        status: createdOrder.status,
-        isVipOrder: createdOrder.isVipOrder,
-        failureReason: createdOrder.failureReason,
-        createdAt: createdOrder.createdAt,
-        updatedAt: createdOrder.updatedAt,
+        _id: populatedOrder._id.toString(),
+        userId: populatedOrder.userId.toString(),
+        productName: (populatedOrder.productId as any).name,
+        productDescription: (populatedOrder.productId as any).description,
+        availableStock: (populatedOrder.stockId as any).quantity,
+        quantity: populatedOrder.quantity,
+        priceAtPurchase: populatedOrder.priceAtPurchase,
+        status: populatedOrder.status,
+        isVipOrder: populatedOrder.isVipOrder,
+        failureReason: populatedOrder.failureReason,
+        createdAt: populatedOrder.createdAt,
+        updatedAt: populatedOrder.updatedAt,
       };
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      
+
       this.logger.error(
         `Order creation failed - UserId: ${userId}, StockId: ${createOrderDto.stockId}, Error: ${error.message}, ProcessingTime: ${processingTime}ms`,
         error.stack,
       );
-      
+
       // Re-throw the error to let NestJS handle the HTTP response
+      throw error;
+    }
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get user orders',
+    description: 'Retrieves all orders for the authenticated user with product details and current stock information, sorted by creation date (most recent first).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Orders retrieved successfully',
+    type: [OrderResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  async getUserOrders(@CurrentUser() user: User): Promise<OrderResponseDto[]> {
+    const startTime = Date.now();
+    const userId = (user as any)._id.toString();
+
+    this.logger.log(`Fetching orders for user: ${userId}`);
+
+    try {
+      const orders = await this.orderService.findOrdersByUserId(userId);
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `Orders retrieved successfully - UserId: ${userId}, Count: ${orders.length}, ProcessingTime: ${processingTime}ms`,
+      );
+
+      // Transform orders to response DTOs
+      return orders.map(order => ({
+        _id: order._id.toString(),
+        userId: order.userId.toString(),
+        productName: (order.productId as any).name,
+        productDescription: (order.productId as any).description,
+        availableStock: (order.stockId as any).quantity,
+        quantity: order.quantity,
+        priceAtPurchase: order.priceAtPurchase,
+        status: order.status,
+        isVipOrder: order.isVipOrder,
+        failureReason: order.failureReason,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+      }));
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+
+      this.logger.error(
+        `Failed to retrieve orders - UserId: ${userId}, Error: ${error.message}, ProcessingTime: ${processingTime}ms`,
+        error.stack,
+      );
+
       throw error;
     }
   }

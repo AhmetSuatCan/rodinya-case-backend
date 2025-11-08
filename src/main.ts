@@ -13,7 +13,7 @@ async function bootstrap() {
   // CORS configuration
   const isDevelopment = process.env.NODE_ENV === 'development';
   app.enableCors({
-    origin: isDevelopment ? true : false, // Allow all origins in development
+    origin: isDevelopment ? true : ['http://localhost:3000'], // Allow all origins in development, specific origins in production
     credentials: true, // Allow cookies to be sent
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
