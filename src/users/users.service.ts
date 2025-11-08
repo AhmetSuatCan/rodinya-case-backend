@@ -104,4 +104,38 @@ export class UsersService {
   ): Promise<void> {
     await this.userModel.findByIdAndUpdate(userId, { refreshToken });
   }
+
+  async promoteToVIP(email: string): Promise<User> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
+    if (user.isVIP) {
+      throw new ConflictException('User is already a VIP');
+    }
+
+    user.isVIP = true;
+    await user.save();
+
+    // Return user without sensitive fields
+    return await this.findOne(user._id.toString());
+  }
+
+  async demoteFromVIP(email: string): Promise<User> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
+    if (!user.isVIP) {
+      throw new ConflictException('User is not a VIP');
+    }
+
+    user.isVIP = false;
+    await user.save();
+
+    // Return user without sensitive fields
+    return await this.findOne(user._id.toString());
+  }
 }

@@ -148,4 +148,60 @@ export class UsersController {
   async remove(@Param('id') id: string) {
     await this.usersService.remove(id);
   }
+
+  @Post(':email/promote-vip')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Promote user to VIP',
+    description: 'Promotes a user to VIP status using their email address',
+  })
+  @ApiParam({
+    name: 'email',
+    description: 'User email address',
+    example: 'user@example.com',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User promoted to VIP successfully',
+    type: UserResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    type: UserErrorResponseDto,
+  })
+  @ApiConflictResponse({
+    description: 'User is already a VIP',
+    type: UserErrorResponseDto,
+  })
+  async promoteToVIP(@Param('email') email: string) {
+    return await this.usersService.promoteToVIP(email);
+  }
+
+  @Post(':email/demote-vip')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Demote user from VIP',
+    description: 'Demotes a user from VIP status using their email address',
+  })
+  @ApiParam({
+    name: 'email',
+    description: 'User email address',
+    example: 'user@example.com',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User demoted from VIP successfully',
+    type: UserResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    type: UserErrorResponseDto,
+  })
+  @ApiConflictResponse({
+    description: 'User is not a VIP',
+    type: UserErrorResponseDto,
+  })
+  async demoteFromVIP(@Param('email') email: string) {
+    return await this.usersService.demoteFromVIP(email);
+  }
 }
