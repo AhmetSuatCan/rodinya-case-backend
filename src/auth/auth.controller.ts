@@ -11,6 +11,7 @@ import {
   Get,
   UseGuards,
   Inject,
+  UnauthorizedException,
 } from '@nestjs/common';
 import type { LoggerService } from '@nestjs/common';
 import {
@@ -216,9 +217,7 @@ export class AuthController {
         'Token refresh failed: No refresh token found in cookies',
         'AuthController',
       );
-      return res.status(HttpStatus.UNAUTHORIZED).json({
-        message: 'Refresh token not found',
-      });
+      throw new UnauthorizedException('Refresh token not found');
     }
 
     try {
@@ -248,9 +247,7 @@ export class AuthController {
       );
       res.clearCookie('access_token');
       res.clearCookie('refresh_token');
-      return res.status(HttpStatus.UNAUTHORIZED).json({
-        message: 'Invalid refresh token',
-      });
+      throw new UnauthorizedException('Invalid refresh token');
     }
   }
 

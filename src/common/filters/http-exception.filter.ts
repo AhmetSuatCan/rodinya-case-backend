@@ -17,15 +17,23 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    // Check if response has already been sent
+    if (response.headersSent) {
+      this.logger.error(
+        `Cannot send response - headers already sent for ${request.method} ${request.url}`,
+      );
+      return;
+    }
+
     let status: number;
-    let message: string | object;
+    let message: string;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
       message = typeof exceptionResponse === 'string' 
         ? exceptionResponse 
-        : exceptionResponse;
+        : (exceptionResponse as any)?.message || 'An error occurred';
     } else {
       // Handle non-HTTP exceptions (like database errors, etc.)
       status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -55,12 +63,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message,
     };
 
-    // Log the error for debugging
+    // Safely log the error without JSON.stringify to avoid circular reference issues
     this.logger.error(
-      `HTTP ${status} Error: ${request.method} ${request.url}`,
-      JSON.stringify(errorResponse, null, 2),
+      `HTTP ${status} Error: ${request.method} ${request.url} - ${message}`,
     );
 
-    response.status(status).json(errorResponse);
+    try {
+      response.status(status).json(errorResponse);
+    } catch (responseError) {
+      this.logger.error(
+        `Failed to send error response: ${responseError.message}`,
+      );
+    }
   }
 }
