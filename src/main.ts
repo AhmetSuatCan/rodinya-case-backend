@@ -15,10 +15,21 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // CORS configuration
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const productionOrigins = [
+    'http://localhost:3000', // For local development
+    // This RegEx matches:
+    // 1. https://rodinya-case-frontend.pages.dev (your main site)
+    // 2. https://<any-preview-id>.rodinya-case-frontend.pages.dev (all preview sites)
+    /^https:\/\/([a-zA-Z0-9-]+\.)?rodinya-case-frontend\.pages\.dev$/
+  ];
+
+  // REMOVED: const isDevelopment = process.env.NODE_ENV === 'development';
   app.enableCors({
-    origin: isDevelopment ? true : ['http://localhost:3000'], // Allow all origins in development, specific origins in production
-    credentials: true, // Allow cookies to be sent
+    // JUST USE THE ARRAY YOU ALREADY MADE!
+    // It works for both development (localhost) and production (RegEx).
+    origin: productionOrigins,
+    
+    credentials: true, 
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
