@@ -131,14 +131,14 @@ export class AuthController {
       res.cookie('access_token', result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-        sameSite: 'strict',
+        sameSite: 'none', // Allow cross-origin cookies (required for different domains)
         maxAge: 15 * 60 * 1000, // 15 minutes
       });
 
       res.cookie('refresh_token', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none', // Allow cross-origin cookies (required for different domains)
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
@@ -227,14 +227,14 @@ export class AuthController {
       res.cookie('access_token', tokens.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none', // Allow cross-origin cookies (required for different domains)
         maxAge: 15 * 60 * 1000, // 15 minutes
       });
 
       res.cookie('refresh_token', tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none', // Allow cross-origin cookies (required for different domains)
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
