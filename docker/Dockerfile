@@ -1,11 +1,12 @@
 # Use Node.js 18 Alpine as base image for smaller size
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Set working directory
 WORKDIR /app
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init wget
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs
