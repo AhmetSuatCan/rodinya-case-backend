@@ -181,9 +181,15 @@ export class AuthController {
   async logout(@Res({ passthrough: true }) res: Response) {
     this.logger.log('User logout requested', 'AuthController');
 
-    // Clear cookies
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
+    // Clear cookies with the SAME options used when setting them
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none' as const,
+    };
+
+    res.clearCookie('access_token', cookieOptions);
+    res.clearCookie('refresh_token', cookieOptions);
 
     this.logger.log('User logged out successfully', 'AuthController');
     return { message: 'Logout successful' };
