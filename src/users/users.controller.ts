@@ -1,15 +1,15 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Patch, 
-  Param, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
   Delete,
   HttpCode,
   HttpStatus,
   ValidationPipe,
-  UsePipes
+  UsePipes,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,10 +24,10 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { 
-  UserResponseDto, 
-  UsersListResponseDto, 
-  UserErrorResponseDto 
+import {
+  UserResponseDto,
+  UsersListResponseDto,
+  UserErrorResponseDto,
 } from './dto/user-response.dto';
 
 @ApiTags('users')
@@ -63,7 +63,8 @@ export class UsersController {
   @Get()
   @ApiOperation({
     summary: 'Get all users',
-    description: 'Retrieves a list of all users (excluding sensitive information)',
+    description:
+      'Retrieves a list of all users (excluding sensitive information)',
   })
   @ApiResponse({
     status: 200,

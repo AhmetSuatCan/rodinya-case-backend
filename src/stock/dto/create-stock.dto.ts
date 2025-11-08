@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsOptional, Min, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  Min,
+  IsMongoId,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateStockDto {
@@ -8,7 +14,7 @@ export class CreateStockDto {
   })
   @IsString()
   @IsMongoId()
-  product: string;
+  productId: string;
 
   @ApiPropertyOptional({
     description: 'Initial quantity of stock',

@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
@@ -11,7 +15,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   async register(registerDto: RegisterDto): Promise<User> {
     const { email, password, name } = registerDto;
@@ -31,9 +35,9 @@ export class AuthService {
     });
   }
 
-  async login(loginDto: LoginDto): Promise<{ 
-    user: Omit<User, 'passwordHash' | 'refreshToken'>; 
-    accessToken: string; 
+  async login(loginDto: LoginDto): Promise<{
+    user: Omit<User, 'passwordHash' | 'refreshToken'>;
+    accessToken: string;
     refreshToken: string;
     message: string;
   }> {
@@ -51,11 +55,18 @@ export class AuthService {
     const refreshToken = this.generateRefreshToken(payload);
 
     // Store refresh token in database
-    await this.usersService.updateRefreshToken((user as any)._id.toString(), refreshToken);
+    await this.usersService.updateRefreshToken(
+      (user as any)._id.toString(),
+      refreshToken,
+    );
 
     // Remove sensitive fields from user object
     const userObj = (user as UserDocument).toObject();
-    const { passwordHash, refreshToken: _, ...userWithoutSensitiveData } = userObj;
+    const {
+      passwordHash,
+      refreshToken: _,
+      ...userWithoutSensitiveData
+    } = userObj;
 
     return {
       user: userWithoutSensitiveData,
@@ -71,7 +82,9 @@ export class AuthService {
 
   private generateRefreshToken(payload: any): string {
     return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'your-refresh-secret-key',
+      secret:
+        this.configService.get<string>('JWT_REFRESH_SECRET') ||
+        'your-refresh-secret-key',
       expiresIn: '7d', // Refresh token expires in 7 days
     });
   }
@@ -83,7 +96,9 @@ export class AuthService {
     try {
       // Verify refresh token
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'your-refresh-secret-key',
+        secret:
+          this.configService.get<string>('JWT_REFRESH_SECRET') ||
+          'your-refresh-secret-key',
       });
 
       // Find user by ID

@@ -6,7 +6,6 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
-
   @Prop({ required: true })
   name: string;
 
@@ -35,7 +34,7 @@ export const UserSchema = SchemaFactory.createForClass(User);
 // Hash password before saving
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('passwordHash')) return next();
-  
+
   const saltRounds = 10;
   this.passwordHash = await bcrypt.hash(this.passwordHash, saltRounds);
   next();
@@ -44,7 +43,7 @@ UserSchema.pre('save', async function (next) {
 // Hash refresh token before saving
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('refreshToken') || !this.refreshToken) return next();
-  
+
   const saltRounds = 10;
   this.refreshToken = await bcrypt.hash(this.refreshToken, saltRounds);
   next();

@@ -11,7 +11,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -26,18 +27,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET') || 'fallback-secret-key',
+      secretOrKey:
+        configService.get<string>('JWT_SECRET') || 'fallback-secret-key',
     });
   }
 
   async validate(payload: any) {
-    this.logger.log(`JWT validation for user ID: ${payload.sub}`, 'JwtStrategy');
+    this.logger.log(
+      `JWT validation for user ID: ${payload.sub}`,
+      'JwtStrategy',
+    );
     const user = await this.usersService.findOne(payload.sub);
     if (!user) {
       this.logger.error(`User not found for ID: ${payload.sub}`, 'JwtStrategy');
       throw new UnauthorizedException();
     }
-    this.logger.log(`JWT validation successful for user: ${user.email}`, 'JwtStrategy');
+    this.logger.log(
+      `JWT validation successful for user: ${user.email}`,
+      'JwtStrategy',
+    );
     return user;
   }
 }

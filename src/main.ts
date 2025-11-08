@@ -6,10 +6,10 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Set Winston as the default logger
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-  
+
   // CORS configuration
   const isDevelopment = process.env.NODE_ENV === 'development';
   app.enableCors({
@@ -18,17 +18,19 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
-  
+
   // Cookie parser middleware
   const cookieParser = require('cookie-parser');
   app.use(cookieParser());
-  
+
   // Global validation pipe
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    forbidNonWhitelisted: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -41,7 +43,7 @@ async function bootstrap() {
       type: 'http',
       in: 'cookie',
       scheme: 'Bearer',
-      description: 'JWT access token stored in HTTP-only cookie'
+      description: 'JWT access token stored in HTTP-only cookie',
     })
     .build();
 
@@ -51,12 +53,18 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
-  
+
   const port = process.env.PORT ?? 8000;
   await app.listen(port);
-  
+
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
-  logger.log(`Application is running on: http://localhost:${port}`, 'Bootstrap');
-  logger.log(`Swagger documentation available at: http://localhost:${port}/api/docs`, 'Bootstrap');
+  logger.log(
+    `Application is running on: http://localhost:${port}`,
+    'Bootstrap',
+  );
+  logger.log(
+    `Swagger documentation available at: http://localhost:${port}/api/docs`,
+    'Bootstrap',
+  );
 }
 bootstrap();

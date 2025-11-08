@@ -7,7 +7,7 @@ export type StockDocument = Stock & Document;
 @Schema({ timestamps: true })
 export class Stock {
   @Prop({ type: Types.ObjectId, ref: 'Product', required: true, unique: true })
-  product: Types.ObjectId | Product;
+  productId: Types.ObjectId | Product;
 
   @Prop({ required: true, default: 0, min: 0 })
   quantity: number;

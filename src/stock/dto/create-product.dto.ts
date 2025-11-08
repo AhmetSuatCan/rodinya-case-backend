@@ -1,4 +1,11 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsUrl, Min } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsArray,
+  IsUrl,
+  Min,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProductDto {
@@ -30,7 +37,7 @@ export class CreateProductDto {
     description: 'Array of image URLs for the product',
     example: [
       'https://example.com/image1.jpg',
-      'https://example.com/image2.jpg'
+      'https://example.com/image2.jpg',
     ],
     type: [String],
   })

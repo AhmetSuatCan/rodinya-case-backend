@@ -9,8 +9,8 @@ import { Stock, StockSchema } from './entities/stock.entity';
   imports: [
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
-      { name: Stock.name, schema: StockSchema }
-    ])
+      { name: Stock.name, schema: StockSchema },
+    ]),
   ],
   controllers: [StockController],
   providers: [StockService],

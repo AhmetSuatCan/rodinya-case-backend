@@ -10,7 +10,7 @@ import {
   Req,
   Get,
   UseGuards,
-  Inject
+  Inject,
 } from '@nestjs/common';
 import type { LoggerService } from '@nestjs/common';
 import {
@@ -44,8 +44,9 @@ import {
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService,
-  ) { }
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
+  ) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -68,13 +69,22 @@ export class AuthController {
     type: ErrorResponseDto,
   })
   async register(@Body() registerDto: RegisterDto) {
-    this.logger.log(`Registration attempt for email: ${registerDto.email}`, 'AuthController');
+    this.logger.log(
+      `Registration attempt for email: ${registerDto.email}`,
+      'AuthController',
+    );
     try {
       const result = await this.authService.register(registerDto);
-      this.logger.log(`User registered successfully: ${registerDto.email}`, 'AuthController');
+      this.logger.log(
+        `User registered successfully: ${registerDto.email}`,
+        'AuthController',
+      );
       return result;
     } catch (error) {
-      this.logger.error(`Registration failed for email: ${registerDto.email} - ${error.message}`, 'AuthController');
+      this.logger.error(
+        `Registration failed for email: ${registerDto.email} - ${error.message}`,
+        'AuthController',
+      );
       throw error;
     }
   }
@@ -99,8 +109,14 @@ export class AuthController {
     description: 'Invalid email or password',
     type: ErrorResponseDto,
   })
-  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    this.logger.log(`Login attempt for email: ${loginDto.email}`, 'AuthController');
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    this.logger.log(
+      `Login attempt for email: ${loginDto.email}`,
+      'AuthController',
+    );
     try {
       const result = await this.authService.login(loginDto);
 
@@ -119,7 +135,10 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
-      this.logger.log(`User logged in successfully: ${loginDto.email}`, 'AuthController');
+      this.logger.log(
+        `User logged in successfully: ${loginDto.email}`,
+        'AuthController',
+      );
 
       // Return response without tokens (they're in cookies now)
       return {
@@ -127,7 +146,10 @@ export class AuthController {
         message: result.message,
       };
     } catch (error) {
-      this.logger.error(`Login failed for email: ${loginDto.email} - ${error.message}`, 'AuthController');
+      this.logger.error(
+        `Login failed for email: ${loginDto.email} - ${error.message}`,
+        'AuthController',
+      );
       throw error;
     }
   }
@@ -158,7 +180,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Refresh access token',
-    description: 'Uses refresh token from cookie to generate new access and refresh tokens',
+    description:
+      'Uses refresh token from cookie to generate new access and refresh tokens',
   })
   @ApiResponse({
     status: 200,
@@ -171,13 +194,16 @@ export class AuthController {
   })
   async refresh(
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
     this.logger.log('Token refresh requested', 'AuthController');
     const refreshToken = req.cookies?.refresh_token;
 
     if (!refreshToken) {
-      this.logger.warn('Token refresh failed: No refresh token found in cookies', 'AuthController');
+      this.logger.warn(
+        'Token refresh failed: No refresh token found in cookies',
+        'AuthController',
+      );
       return res.status(HttpStatus.UNAUTHORIZED).json({
         message: 'Refresh token not found',
       });
@@ -204,7 +230,10 @@ export class AuthController {
       this.logger.log('Tokens refreshed successfully', 'AuthController');
       return { message: 'Tokens refreshed successfully' };
     } catch (error) {
-      this.logger.error(`Token refresh failed: ${error.message}`, 'AuthController');
+      this.logger.error(
+        `Token refresh failed: ${error.message}`,
+        'AuthController',
+      );
       res.clearCookie('access_token');
       res.clearCookie('refresh_token');
       return res.status(HttpStatus.UNAUTHORIZED).json({

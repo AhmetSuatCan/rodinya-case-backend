@@ -26,7 +26,7 @@ export const winstonConfig: WinstonModuleOptions = {
     new winston.transports.Console({
       format: consoleFormat,
     }),
-    
+
     // File transport for all logs
     new winston.transports.File({
       filename: join(process.cwd(), 'logs', 'application.log'),
@@ -34,7 +34,7 @@ export const winstonConfig: WinstonModuleOptions = {
       maxsize: 10 * 1024 * 1024, // 10MB
       maxFiles: 5,
     }),
-    
+
     // File transport for error logs only
     new winston.transports.File({
       filename: join(process.cwd(), 'logs', 'error.log'),
